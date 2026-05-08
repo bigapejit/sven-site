@@ -60,34 +60,58 @@
     </div>
 
     <!-- Center content -->
-    <div class="flex-1 flex flex-col items-center justify-center px-6 overflow-hidden">
-      <!-- Large album art -->
-      <img
-        id="fs-art"
-        src="/fallback-artwork.svg"
-        alt="Episode artwork"
-        class="w-64 h-64 md:w-72 md:h-72 lg:w-80 lg:h-80 rounded-2xl object-cover shadow-2xl shadow-black/50"
-      />
+    <div id="fs-center" class="flex-1 flex flex-col items-center justify-center px-6 overflow-hidden min-h-0">
+      <!-- Art view (default) -->
+      <div id="fs-art-view" class="flex flex-col items-center">
+        <!-- Large album art -->
+        <img
+          id="fs-art"
+          src="/fallback-artwork.svg"
+          alt="Episode artwork"
+          class="w-64 h-64 md:w-72 md:h-72 lg:w-80 lg:h-80 rounded-2xl object-cover shadow-2xl shadow-black/50"
+        />
 
-      <!-- Metadata -->
-      <div class="mt-8 text-center w-full max-w-md">
-        <p id="fs-date" class="text-sm text-white/60"></p>
-        <div class="flex items-center justify-center gap-2 mt-1">
-          <h2 id="fs-title" class="text-xl md:text-2xl font-bold text-white truncate">Select an episode</h2>
-          <div class="relative flex-shrink-0">
-            <button id="fs-share-btn" class="w-8 h-8 flex items-center justify-center text-white/60 hover:text-white transition-colors cursor-pointer" title="Share episode">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13"/>
-              </svg>
-            </button>
-            <span id="fs-share-toast" class="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-white text-[#1a0a2e] text-xs font-semibold rounded opacity-0 pointer-events-none transition-opacity whitespace-nowrap">Copied!</span>
+        <!-- Metadata -->
+        <div class="mt-8 text-center w-full max-w-md">
+          <p id="fs-date" class="text-sm text-white/60"></p>
+          <div class="flex items-center justify-center gap-2 mt-1">
+            <h2 id="fs-title" class="text-xl md:text-2xl font-bold text-white truncate">Select an episode</h2>
+            <div class="relative flex-shrink-0">
+              <button id="fs-share-btn" class="w-8 h-8 flex items-center justify-center text-white/60 hover:text-white transition-colors cursor-pointer" title="Share episode">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13"/>
+                </svg>
+              </button>
+              <span id="fs-share-toast" class="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-white text-[#1a0a2e] text-xs font-semibold rounded opacity-0 pointer-events-none transition-opacity whitespace-nowrap">Copied!</span>
+            </div>
           </div>
+          <p id="fs-subtitle" class="text-sm text-white/50 mt-1"></p>
         </div>
-        <p id="fs-subtitle" class="text-sm text-white/50 mt-1"></p>
+      </div>
+
+      <!-- Up Next panel -->
+      <div id="fs-up-next-panel" class="hidden w-full max-w-md flex-1 flex flex-col min-h-0 pt-2">
+        <div class="flex items-center gap-3 p-3 bg-white/10 rounded-xl mb-4 flex-shrink-0">
+          <img id="un-current-art" src="/fallback-artwork.svg" alt="" class="w-12 h-12 rounded-lg object-cover flex-shrink-0" />
+          <div class="flex-1 min-w-0">
+            <p id="un-current-title" class="text-sm font-semibold text-white truncate"></p>
+            <p id="un-current-date" class="text-xs text-white/60"></p>
+          </div>
+          <button id="un-share-btn" class="w-8 h-8 flex items-center justify-center text-white/60 hover:text-white transition-colors cursor-pointer flex-shrink-0" title="Share episode">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13"/>
+            </svg>
+          </button>
+        </div>
+        <p class="text-xs uppercase tracking-wider text-white/40 mb-2 px-1 flex-shrink-0">Up Next</p>
+        <div id="un-list" class="flex-1 overflow-y-auto min-h-0 overscroll-contain"></div>
+        <div id="un-empty" class="hidden flex-1 items-center justify-center">
+          <p class="text-white/40 text-sm">Nothing Playing Next</p>
+        </div>
       </div>
 
       <!-- Progress bar -->
-      <div class="w-full max-w-md mt-8">
+      <div class="w-full max-w-md mt-8 flex-shrink-0">
         <div id="fs-progress-bar" class="relative w-full h-[3px] bg-white/20 rounded-full cursor-pointer group">
           <div id="fs-progress-fill" class="absolute left-0 top-0 h-full bg-white rounded-full" style="width: 0%"></div>
           <div id="fs-progress-thumb" class="absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-md" style="left: 0%"></div>
@@ -99,7 +123,7 @@
       </div>
 
       <!-- Playback controls -->
-      <div class="flex items-center gap-6 mt-8">
+      <div class="flex items-center gap-6 mt-8 flex-shrink-0">
         <!-- Speed -->
         <button id="fs-speed-btn" class="w-12 h-8 rounded-full border border-white/30 text-sm font-semibold text-white/70 hover:text-white hover:border-white/60 transition-colors cursor-pointer" title="Playback speed">
           1x
@@ -131,8 +155,12 @@
           </svg>
         </button>
 
-        <!-- Empty spacer to balance speed button -->
-        <div class="w-12 h-8"></div>
+        <!-- Up Next toggle -->
+        <button id="fs-up-next-btn" class="w-12 h-8 flex items-center justify-center text-white/40 hover:text-white transition-colors cursor-pointer" title="Up Next">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M4 6h16M4 12h16M4 18h10"/>
+          </svg>
+        </button>
       </div>
     </div>
 
@@ -438,6 +466,7 @@
 
   function closeFullscreen() {
     fsOpen = false;
+    if (upNextVisible) toggleUpNext();
     fsPlayer.classList.remove('translate-y-0');
     fsPlayer.classList.add('translate-y-full');
     document.body.style.overflow = '';
@@ -484,6 +513,8 @@
         playerArtMobile.src = image;
         updateFullscreenData(title, image, date);
         showPlayer();
+        buildQueue(url);
+        if (upNextVisible) updateUpNextPanel();
       }
 
       audio.play();
@@ -645,4 +676,244 @@
     const pct = Math.max(0, Math.min(1, (touch.clientX - rect.left) / rect.width));
     audio.currentTime = pct * audio.duration;
   }
+
+  // --- Up Next ---
+
+  interface QueueEpisode {
+    title: string;
+    episode: string;
+    audioUrl: string;
+    imageUrl: string;
+    date: string;
+  }
+
+  const episodeDataEl = document.getElementById('episode-data');
+  const allEpisodes: QueueEpisode[] = episodeDataEl ? JSON.parse(episodeDataEl.textContent || '[]') : [];
+
+  let upNextQueue: QueueEpisode[] = [];
+  let currentEpisode: QueueEpisode | null = null;
+  let upNextVisible = false;
+
+  const fsCenter = document.getElementById('fs-center')!;
+  const fsArtView = document.getElementById('fs-art-view')!;
+  const fsUpNextPanel = document.getElementById('fs-up-next-panel')!;
+  const fsUpNextBtn = document.getElementById('fs-up-next-btn')!;
+  const unCurrentArt = document.getElementById('un-current-art') as HTMLImageElement;
+  const unCurrentTitle = document.getElementById('un-current-title')!;
+  const unCurrentDate = document.getElementById('un-current-date')!;
+  const unShareBtn = document.getElementById('un-share-btn')!;
+  const unList = document.getElementById('un-list')!;
+  const unEmpty = document.getElementById('un-empty')!;
+  const upNextBtnMini = document.getElementById('up-next-btn');
+
+  function toggleUpNext() {
+    upNextVisible = !upNextVisible;
+    if (upNextVisible) {
+      fsArtView.classList.add('hidden');
+      fsUpNextPanel.classList.remove('hidden');
+      fsCenter.classList.remove('justify-center');
+      fsUpNextBtn.classList.remove('text-white/40');
+      fsUpNextBtn.classList.add('text-white');
+      updateUpNextPanel();
+    } else {
+      fsArtView.classList.remove('hidden');
+      fsUpNextPanel.classList.add('hidden');
+      fsCenter.classList.add('justify-center');
+      fsUpNextBtn.classList.add('text-white/40');
+      fsUpNextBtn.classList.remove('text-white');
+    }
+  }
+
+  fsUpNextBtn.addEventListener('click', toggleUpNext);
+
+  if (upNextBtnMini) {
+    upNextBtnMini.classList.remove('opacity-50');
+    upNextBtnMini.addEventListener('click', () => {
+      if (!audio.src) return;
+      openFullscreen();
+      if (!upNextVisible) toggleUpNext();
+    });
+  }
+
+  function buildQueue(playingUrl: string) {
+    const idx = allEpisodes.findIndex(ep => ep.audioUrl === playingUrl);
+    currentEpisode = idx >= 0 ? allEpisodes[idx] : null;
+    upNextQueue = idx >= 0 ? [...allEpisodes.slice(idx + 1)] : [];
+  }
+
+  function updateUpNextPanel() {
+    if (!upNextVisible) return;
+    if (currentEpisode) {
+      unCurrentArt.src = currentEpisode.imageUrl || '/fallback-artwork.svg';
+      unCurrentTitle.textContent = currentEpisode.title;
+      unCurrentDate.textContent = formatDate(currentEpisode.date);
+    }
+    renderQueue();
+  }
+
+  function renderQueue() {
+    unList.innerHTML = '';
+    if (upNextQueue.length === 0) {
+      unList.classList.add('hidden');
+      unEmpty.classList.remove('hidden');
+      unEmpty.classList.add('flex');
+      return;
+    }
+    unList.classList.remove('hidden');
+    unEmpty.classList.remove('flex');
+    unEmpty.classList.add('hidden');
+
+    upNextQueue.forEach((ep, i) => {
+      const item = createQueueItem(ep, i);
+      makeDraggable(item);
+      unList.appendChild(item);
+    });
+  }
+
+  function createQueueItem(ep: QueueEpisode, i: number): HTMLElement {
+    const item = document.createElement('div');
+    item.className = 'un-item flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 select-none transition-colors';
+    item.dataset.queueIndex = String(i);
+    item.dataset.audioUrl = ep.audioUrl;
+
+    const handle = document.createElement('div');
+    handle.className = 'un-drag-handle flex items-center text-white/30 flex-shrink-0 cursor-grab active:cursor-grabbing';
+    handle.innerHTML = '<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><circle cx="9" cy="7" r="1.5"/><circle cx="15" cy="7" r="1.5"/><circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="9" cy="17" r="1.5"/><circle cx="15" cy="17" r="1.5"/></svg>';
+
+    const img = document.createElement('img');
+    img.src = ep.imageUrl || '/fallback-artwork.svg';
+    img.alt = '';
+    img.className = 'w-10 h-10 rounded-lg object-cover flex-shrink-0';
+
+    const info = document.createElement('div');
+    info.className = 'flex-1 min-w-0';
+
+    const titleEl = document.createElement('p');
+    titleEl.className = 'text-sm font-medium text-white truncate';
+    titleEl.textContent = ep.title;
+
+    const dateEl = document.createElement('p');
+    dateEl.className = 'text-xs text-white/50';
+    dateEl.textContent = formatDate(ep.date);
+
+    info.append(titleEl, dateEl);
+    item.append(handle, img, info);
+    return item;
+  }
+
+  // --- Drag to reorder ---
+
+  let dragState: { el: HTMLElement; startY: number; didDrag: boolean } | null = null;
+
+  function makeDraggable(item: HTMLElement) {
+    const handle = item.querySelector('.un-drag-handle') as HTMLElement;
+    handle.style.touchAction = 'none';
+
+    handle.addEventListener('pointerdown', (e: PointerEvent) => {
+      if (dragState) return;
+      e.preventDefault();
+      handle.setPointerCapture(e.pointerId);
+      dragState = { el: item, startY: e.clientY, didDrag: false };
+      item.style.opacity = '0.4';
+      item.style.background = 'rgba(255,255,255,0.08)';
+    });
+
+    handle.addEventListener('pointermove', (e: PointerEvent) => {
+      if (!dragState || dragState.el !== item) return;
+      if (Math.abs(e.clientY - dragState.startY) > 5) dragState.didDrag = true;
+      if (!dragState.didDrag) return;
+
+      const prev = item.previousElementSibling as HTMLElement | null;
+      const next = item.nextElementSibling as HTMLElement | null;
+
+      if (prev) {
+        const rect = prev.getBoundingClientRect();
+        if (e.clientY < rect.top + rect.height / 2) {
+          unList.insertBefore(item, prev);
+          syncQueueFromDOM();
+        }
+      }
+      if (next) {
+        const rect = next.getBoundingClientRect();
+        if (e.clientY > rect.top + rect.height / 2) {
+          unList.insertBefore(next, item);
+          syncQueueFromDOM();
+        }
+      }
+    });
+
+    handle.addEventListener('pointerup', () => {
+      if (!dragState || dragState.el !== item) return;
+      item.style.opacity = '';
+      item.style.background = '';
+      dragState = null;
+    });
+
+    handle.addEventListener('pointercancel', () => {
+      if (!dragState || dragState.el !== item) return;
+      item.style.opacity = '';
+      item.style.background = '';
+      dragState = null;
+    });
+
+    handle.addEventListener('click', (e: MouseEvent) => e.stopPropagation());
+
+    item.addEventListener('click', () => {
+      if (dragState) return;
+      const idx = parseInt(item.dataset.queueIndex!);
+      playFromQueue(idx);
+    });
+  }
+
+  function syncQueueFromDOM() {
+    const items = Array.from(unList.children) as HTMLElement[];
+    upNextQueue = items.map(item => {
+      const url = item.dataset.audioUrl!;
+      return allEpisodes.find(e => e.audioUrl === url)!;
+    });
+    items.forEach((item, i) => item.dataset.queueIndex = String(i));
+  }
+
+  function playFromQueue(queueIndex: number) {
+    const ep = upNextQueue[queueIndex];
+    if (!ep) return;
+    upNextQueue.splice(queueIndex, 1);
+    playEpisode(ep);
+  }
+
+  function playEpisode(ep: QueueEpisode) {
+    currentEpisode = ep;
+    audio.src = ep.audioUrl;
+    currentRawDate = ep.date;
+    audio.play();
+
+    const image = ep.imageUrl || '/fallback-artwork.svg';
+    playerTitle.textContent = ep.title;
+    playerTitleMobile.textContent = ep.title;
+    playerDate.textContent = formatDate(ep.date);
+    playerArt.src = image;
+    playerArtMobile.src = image;
+    updateFullscreenData(ep.title, image, ep.date);
+    showPlayer();
+    updateUpNextPanel();
+  }
+
+  audio.addEventListener('ended', () => {
+    if (upNextQueue.length === 0) return;
+    const next = upNextQueue.shift()!;
+    playEpisode(next);
+  });
+
+  unShareBtn.addEventListener('click', async () => {
+    const title = unCurrentTitle.textContent || '';
+    const url = window.location.href;
+    if (navigator.share) {
+      try { await navigator.share({ title, url }); } catch {}
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(url);
+      showShareToast();
+    } catch {}
+  });
 </script>
