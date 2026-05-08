@@ -4,10 +4,12 @@ interface Props {
   episode: string;
   duration: string;
   audioUrl: string;
+  imageUrl: string;
+  date: string;
   index: number;
 }
 
-const { title, episode, duration, audioUrl, index } = Astro.props;
+const { title, episode, duration, audioUrl, imageUrl, date, index } = Astro.props;
 ---
 
 <button
@@ -15,6 +17,8 @@ const { title, episode, duration, audioUrl, index } = Astro.props;
   data-audio-url={audioUrl}
   data-title={title}
   data-episode={episode}
+  data-image={imageUrl}
+  data-date={date}
 >
   <div class="flex items-center gap-4">
     <div class="flex-shrink-0 w-10 h-10 rounded-xl bg-purple/10 border border-purple/20 flex items-center justify-center group-hover:bg-purple/20 transition-colors">

@@ -5,19 +5,26 @@ import PlatformLinks from '../components/PlatformLinks.astro';
 import Player from '../components/Player.astro';
 
 const RSS_URL = 'https://api.riverside.com/hosting/kWEPdAuw.rss';
+const FALLBACK_IMAGE = '/fallback-artwork.svg';
 
 interface Episode {
   title: string;
   episode: string;
   duration: string;
   audioUrl: string;
+  imageUrl: string;
+  date: string;
 }
 
 let episodes: Episode[] = [];
+let showImage = FALLBACK_IMAGE;
 
 try {
   const res = await fetch(RSS_URL);
   const xml = await res.text();
+
+  const channelImage = xml.match(/<itunes:image\s+href="([^"]+)"/)?.[1] || FALLBACK_IMAGE;
+  showImage = channelImage;
 
   const items = xml.match(/<item[\s\S]*?<\/item>/g) || [];
 
@@ -32,7 +39,12 @@ try {
 
     const audioUrl = item.match(/<enclosure[^>]+url="([^"]+)"/)?.[1] || '';
 
-    return { title, episode: episodeNum, duration, audioUrl };
+    const episodeImage = item.match(/<itunes:image\s+href="([^"]+)"/)?.[1] || '';
+    const imageUrl = episodeImage || channelImage;
+
+    const pubDate = item.match(/<pubDate>(.*?)<\/pubDate>/)?.[1] || '';
+
+    return { title, episode: episodeNum, duration, audioUrl, imageUrl, date: pubDate };
   }).filter((ep) => ep.audioUrl);
 } catch (e) {
   // RSS fetch failed — page renders with empty episode list
@@ -77,6 +89,8 @@ function formatDuration(raw: string): string {
             episode={ep.episode}
             duration={formatDuration(ep.duration)}
             audioUrl={ep.audioUrl}
+            imageUrl={ep.imageUrl}
+            date={ep.date}
             index={i}
           />
         ))}
@@ -88,4 +102,14 @@ function formatDuration(raw: string): string {
   </main>
 
   <Player />
+
+  <script type="application/json" id="episode-data" set:html={JSON.stringify(
+    episodes.map((ep) => ({
+      title: ep.title,
+      episode: ep.episode,
+      audioUrl: ep.audioUrl,
+      imageUrl: ep.imageUrl,
+      date: ep.date,
+    }))
+  )} />
 </Layout>
