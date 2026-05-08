@@ -1,6 +1,157 @@
 ---
 ---
 
+<!-- Full-screen player overlay -->
+<div id="fullscreen-player" class="fixed inset-0 z-[60] translate-y-full transition-transform duration-500 ease-out will-change-transform">
+  <!-- Blurred background -->
+  <div class="absolute inset-0 overflow-hidden">
+    <img
+      id="fs-bg"
+      src="/fallback-artwork.svg"
+      alt=""
+      class="absolute inset-0 w-full h-full object-cover scale-125 blur-[80px] opacity-60"
+    />
+    <div class="absolute inset-0 bg-[#1a0a2e]/70"></div>
+  </div>
+
+  <!-- Content -->
+  <div class="relative z-10 flex flex-col h-full safe-area-inset">
+    <!-- Top bar -->
+    <div class="flex items-center px-6 pt-6 pb-2">
+      <!-- Desktop: X close button (top-left) -->
+      <button id="fs-close-desktop" class="hidden md:flex w-10 h-10 items-center justify-center text-white/70 hover:text-white transition-colors cursor-pointer" title="Close">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M6 6l12 12M18 6L6 18"/>
+        </svg>
+      </button>
+
+      <!-- Mobile: chevron-down (top center) -->
+      <div class="flex-1 flex justify-center md:hidden">
+        <button id="fs-close-mobile" class="w-10 h-10 flex items-center justify-center text-white/70 hover:text-white transition-colors cursor-pointer" title="Close">
+          <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path d="M6 9l6 6 6-6"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Spacer for desktop layout -->
+      <div class="hidden md:flex flex-1"></div>
+
+      <!-- Desktop: volume (top-right) -->
+      <div id="fs-volume-desktop" class="hidden md:flex items-center gap-2">
+        <button id="fs-volume-icon" class="w-8 h-8 flex items-center justify-center text-white/70 hover:text-white transition-colors cursor-pointer" title="Toggle mute">
+          <svg id="fs-icon-volume-on" class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+          </svg>
+          <svg id="fs-icon-volume-off" class="w-5 h-5 hidden" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4l-1.88 1.88L12 7.76V4z"/>
+          </svg>
+        </button>
+        <input
+          id="fs-volume-slider"
+          type="range"
+          min="0"
+          max="1"
+          step="0.01"
+          value="1"
+          class="w-24 h-1 accent-white cursor-pointer"
+        />
+      </div>
+    </div>
+
+    <!-- Center content -->
+    <div class="flex-1 flex flex-col items-center justify-center px-6 overflow-hidden">
+      <!-- Large album art -->
+      <img
+        id="fs-art"
+        src="/fallback-artwork.svg"
+        alt="Episode artwork"
+        class="w-64 h-64 md:w-72 md:h-72 lg:w-80 lg:h-80 rounded-2xl object-cover shadow-2xl shadow-black/50"
+      />
+
+      <!-- Metadata -->
+      <div class="mt-8 text-center w-full max-w-md">
+        <p id="fs-date" class="text-sm text-white/60"></p>
+        <h2 id="fs-title" class="text-xl md:text-2xl font-bold text-white mt-1 truncate">Select an episode</h2>
+        <p id="fs-subtitle" class="text-sm text-white/50 mt-1"></p>
+      </div>
+
+      <!-- Progress bar -->
+      <div class="w-full max-w-md mt-8">
+        <div id="fs-progress-bar" class="relative w-full h-[3px] bg-white/20 rounded-full cursor-pointer group">
+          <div id="fs-progress-fill" class="absolute left-0 top-0 h-full bg-white rounded-full" style="width: 0%"></div>
+          <div id="fs-progress-thumb" class="absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-md" style="left: 0%"></div>
+        </div>
+        <div class="flex justify-between mt-2 text-xs text-white/60 tabular-nums">
+          <span id="fs-current-time">0:00</span>
+          <span id="fs-remaining-time">-0:00</span>
+        </div>
+      </div>
+
+      <!-- Playback controls -->
+      <div class="flex items-center gap-6 mt-8">
+        <!-- Speed -->
+        <button id="fs-speed-btn" class="w-12 h-8 rounded-full border border-white/30 text-sm font-semibold text-white/70 hover:text-white hover:border-white/60 transition-colors cursor-pointer" title="Playback speed">
+          1x
+        </button>
+
+        <!-- Skip back 15s -->
+        <button id="fs-skip-back" class="w-12 h-12 flex items-center justify-center text-white/70 hover:text-white transition-colors cursor-pointer" title="Back 15s">
+          <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M12.5 8V4l-4 4 4 4V8c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4.5c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/>
+            <text x="10" y="16.5" fill="currentColor" stroke="none" font-size="7" font-weight="600" text-anchor="middle">15</text>
+          </svg>
+        </button>
+
+        <!-- Play/Pause -->
+        <button id="fs-play-pause" class="w-16 h-16 rounded-full bg-white flex items-center justify-center hover:scale-105 transition-transform cursor-pointer">
+          <svg id="fs-icon-play" class="w-7 h-7 text-[#1a0a2e] ml-1" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M8 5v14l11-7z"/>
+          </svg>
+          <svg id="fs-icon-pause" class="w-7 h-7 text-[#1a0a2e] hidden" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M6 4h4v16H6zm8 0h4v16h-4z"/>
+          </svg>
+        </button>
+
+        <!-- Skip forward 30s -->
+        <button id="fs-skip-forward" class="w-12 h-12 flex items-center justify-center text-white/70 hover:text-white transition-colors cursor-pointer" title="Forward 30s">
+          <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M11.5 8V4l4 4-4 4V8c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6h2c0 4.42-3.58 8-8 8s-8-3.58-8-8 3.58-8 8-8z"/>
+            <text x="14" y="16.5" fill="currentColor" stroke="none" font-size="7" font-weight="600" text-anchor="middle">30</text>
+          </svg>
+        </button>
+
+        <!-- Empty spacer to balance speed button -->
+        <div class="w-12 h-8"></div>
+      </div>
+    </div>
+
+    <!-- Mobile: volume (bottom) -->
+    <div id="fs-volume-mobile" class="flex md:hidden items-center gap-3 px-8 pb-8 pt-2">
+      <button id="fs-volume-icon-mobile" class="w-8 h-8 flex items-center justify-center text-white/60 cursor-pointer" title="Mute">
+        <svg id="fs-icon-vol-mute-mobile" class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M3 9v6h4l5 5V4L7 9H3z"/>
+        </svg>
+      </button>
+      <input
+        id="fs-volume-slider-mobile"
+        type="range"
+        min="0"
+        max="1"
+        step="0.01"
+        value="1"
+        class="flex-1 h-1 accent-white cursor-pointer"
+      />
+      <div class="w-8 h-8 flex items-center justify-center text-white/60">
+        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Mini player bar -->
 <div id="player" class="fixed bottom-0 left-0 right-0 z-50 translate-y-full transition-transform duration-300">
   <div class="bg-surface/95 backdrop-blur-xl border-t border-border">
     <div class="max-w-2xl mx-auto px-4 py-3">
@@ -12,12 +163,12 @@
 
       <!-- Desktop layout (≥768px) -->
       <div class="hidden md:flex items-center gap-3">
-        <!-- Album art -->
+        <!-- Album art (clickable to open fullscreen) -->
         <img
           id="player-art"
           src="/fallback-artwork.svg"
           alt="Episode artwork"
-          class="w-11 h-11 rounded-lg object-cover flex-shrink-0 transition-transform duration-200 hover:scale-105"
+          class="w-11 h-11 rounded-lg object-cover flex-shrink-0 transition-transform duration-200 hover:scale-105 cursor-pointer"
         />
 
         <!-- Title & date -->
@@ -97,7 +248,7 @@
       </div>
 
       <!-- Mobile layout (<768px) -->
-      <div class="flex md:hidden items-center gap-3">
+      <div id="mobile-bar" class="flex md:hidden items-center gap-3 cursor-pointer">
         <!-- Album art -->
         <img
           id="player-art-mobile"
@@ -113,7 +264,7 @@
         </div>
 
         <!-- Mobile controls -->
-        <div class="flex items-center gap-1 flex-shrink-0">
+        <div class="flex items-center gap-1 flex-shrink-0" id="mobile-controls">
           <!-- Play/Pause -->
           <button id="play-pause-mobile" class="w-9 h-9 rounded-full bg-purple flex items-center justify-center hover:bg-purple-glow transition-colors cursor-pointer">
             <svg id="icon-play-mobile" class="w-4 h-4 text-white ml-0.5" fill="currentColor" viewBox="0 0 24 24">
@@ -170,10 +321,41 @@
   const playerTitleMobile = document.getElementById('player-title-mobile')!;
   const playerArtMobile = document.getElementById('player-art-mobile') as HTMLImageElement;
   const skipForwardMobile = document.getElementById('skip-forward-mobile')!;
+  const mobileBar = document.getElementById('mobile-bar')!;
+  const mobileControls = document.getElementById('mobile-controls')!;
+
+  // Fullscreen player elements
+  const fsPlayer = document.getElementById('fullscreen-player')!;
+  const fsBg = document.getElementById('fs-bg') as HTMLImageElement;
+  const fsArt = document.getElementById('fs-art') as HTMLImageElement;
+  const fsTitle = document.getElementById('fs-title')!;
+  const fsDate = document.getElementById('fs-date')!;
+  const fsSubtitle = document.getElementById('fs-subtitle')!;
+  const fsProgressBar = document.getElementById('fs-progress-bar')!;
+  const fsProgressFill = document.getElementById('fs-progress-fill')!;
+  const fsProgressThumb = document.getElementById('fs-progress-thumb')!;
+  const fsCurrentTime = document.getElementById('fs-current-time')!;
+  const fsRemainingTime = document.getElementById('fs-remaining-time')!;
+  const fsPlayPause = document.getElementById('fs-play-pause')!;
+  const fsIconPlay = document.getElementById('fs-icon-play')!;
+  const fsIconPause = document.getElementById('fs-icon-pause')!;
+  const fsSkipBack = document.getElementById('fs-skip-back')!;
+  const fsSkipForward = document.getElementById('fs-skip-forward')!;
+  const fsSpeedBtn = document.getElementById('fs-speed-btn')!;
+  const fsCloseDesktop = document.getElementById('fs-close-desktop')!;
+  const fsCloseMobile = document.getElementById('fs-close-mobile')!;
+  const fsVolumeIcon = document.getElementById('fs-volume-icon')!;
+  const fsIconVolumeOn = document.getElementById('fs-icon-volume-on')!;
+  const fsIconVolumeOff = document.getElementById('fs-icon-volume-off')!;
+  const fsVolumeSlider = document.getElementById('fs-volume-slider') as HTMLInputElement;
+  const fsVolumeIconMobile = document.getElementById('fs-volume-icon-mobile')!;
+  const fsVolumeSliderMobile = document.getElementById('fs-volume-slider-mobile') as HTMLInputElement;
 
   const SPEED_OPTIONS = [1, 1.5, 2, 0.5];
   let speedIndex = 0;
   let volumeBeforeMute = 1;
+  let currentRawDate = '';
+  let fsOpen = false;
 
   function formatTime(seconds: number): string {
     const hrs = Math.floor(seconds / 3600);
@@ -183,6 +365,10 @@
       return `${hrs}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
     }
     return `${mins}:${secs.toString().padStart(2, '0')}`;
+  }
+
+  function formatRemainingTime(seconds: number): string {
+    return `-${formatTime(seconds)}`;
   }
 
   function formatDate(dateStr: string): string {
@@ -202,20 +388,73 @@
     iconPause.classList.toggle('hidden', !playing);
     iconPlayMobile.classList.toggle('hidden', playing);
     iconPauseMobile.classList.toggle('hidden', !playing);
+    fsIconPlay.classList.toggle('hidden', playing);
+    fsIconPause.classList.toggle('hidden', !playing);
   }
 
   function updateVolumeIcon() {
     const muted = audio.muted || audio.volume === 0;
     iconVolumeOn.classList.toggle('hidden', muted);
     iconVolumeOff.classList.toggle('hidden', !muted);
+    fsIconVolumeOn.classList.toggle('hidden', muted);
+    fsIconVolumeOff.classList.toggle('hidden', !muted);
   }
 
   function updateSpeedDisplay() {
     const speed = SPEED_OPTIONS[speedIndex];
-    speedBtn.textContent = speed === 1 ? '1x' : `${speed}x`;
+    const label = speed === 1 ? '1x' : `${speed}x`;
+    speedBtn.textContent = label;
+    fsSpeedBtn.textContent = label;
   }
 
-  // Episode card clicks
+  function syncVolumeSliders() {
+    const val = String(audio.volume);
+    volumeSlider.value = val;
+    fsVolumeSlider.value = val;
+    fsVolumeSliderMobile.value = val;
+  }
+
+  // --- Fullscreen player open/close ---
+
+  function openFullscreen() {
+    if (!audio.src) return;
+    fsOpen = true;
+    fsPlayer.classList.remove('translate-y-full');
+    fsPlayer.classList.add('translate-y-0');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeFullscreen() {
+    fsOpen = false;
+    fsPlayer.classList.remove('translate-y-0');
+    fsPlayer.classList.add('translate-y-full');
+    document.body.style.overflow = '';
+  }
+
+  function updateFullscreenData(title: string, imageUrl: string, dateStr: string) {
+    fsArt.src = imageUrl;
+    fsBg.src = imageUrl;
+    fsTitle.textContent = title;
+    const formatted = formatDate(dateStr);
+    fsDate.textContent = formatted;
+    fsSubtitle.textContent = formatted ? `You vs Who — ${formatted}` : 'You vs Who';
+  }
+
+  // Desktop: click album art thumbnail to open fullscreen
+  playerArt.addEventListener('click', openFullscreen);
+
+  // Mobile: tap anywhere on mini bar except play/pause and skip buttons
+  mobileBar.addEventListener('click', (e: MouseEvent) => {
+    if (mobileControls.contains(e.target as Node)) return;
+    openFullscreen();
+  });
+
+  // Close buttons
+  fsCloseDesktop.addEventListener('click', closeFullscreen);
+  fsCloseMobile.addEventListener('click', closeFullscreen);
+
+  // --- Episode card clicks ---
+
   document.querySelectorAll('[data-audio-url]').forEach((card) => {
     card.addEventListener('click', () => {
       const url = card.getAttribute('data-audio-url')!;
@@ -225,11 +464,13 @@
 
       if (audio.src !== url) {
         audio.src = url;
+        currentRawDate = date;
         playerTitle.textContent = title;
         playerTitleMobile.textContent = title;
         playerDate.textContent = formatDate(date);
         playerArt.src = image;
         playerArtMobile.src = image;
+        updateFullscreenData(title, image, date);
         showPlayer();
       }
 
@@ -237,7 +478,8 @@
     });
   });
 
-  // Play/pause (both desktop and mobile)
+  // --- Play/pause ---
+
   function togglePlayPause() {
     if (audio.paused) {
       audio.play();
@@ -247,66 +489,119 @@
   }
   playPause.addEventListener('click', togglePlayPause);
   playPauseMobile.addEventListener('click', togglePlayPause);
+  fsPlayPause.addEventListener('click', togglePlayPause);
 
-  // Skip controls
-  skipBack.addEventListener('click', () => {
+  // --- Skip controls ---
+
+  function doSkipBack() {
     audio.currentTime = Math.max(0, audio.currentTime - 15);
-  });
-  skipForward.addEventListener('click', () => {
+  }
+  function doSkipForward() {
     audio.currentTime = Math.min(audio.duration || 0, audio.currentTime + 30);
-  });
-  skipForwardMobile.addEventListener('click', () => {
-    audio.currentTime = Math.min(audio.duration || 0, audio.currentTime + 30);
-  });
+  }
+  skipBack.addEventListener('click', doSkipBack);
+  skipForward.addEventListener('click', doSkipForward);
+  skipForwardMobile.addEventListener('click', doSkipForward);
+  fsSkipBack.addEventListener('click', doSkipBack);
+  fsSkipForward.addEventListener('click', doSkipForward);
 
-  // Speed control
-  speedBtn.addEventListener('click', () => {
+  // --- Speed control ---
+
+  function cycleSpeed() {
     speedIndex = (speedIndex + 1) % SPEED_OPTIONS.length;
     audio.playbackRate = SPEED_OPTIONS[speedIndex];
     updateSpeedDisplay();
-  });
+  }
+  speedBtn.addEventListener('click', cycleSpeed);
+  fsSpeedBtn.addEventListener('click', cycleSpeed);
 
-  // Volume slider
-  volumeSlider.addEventListener('input', () => {
-    audio.volume = parseFloat(volumeSlider.value);
+  // --- Volume ---
+
+  function handleVolumeInput(value: string) {
+    audio.volume = parseFloat(value);
     audio.muted = false;
+    syncVolumeSliders();
     updateVolumeIcon();
-  });
+  }
+  volumeSlider.addEventListener('input', () => handleVolumeInput(volumeSlider.value));
+  fsVolumeSlider.addEventListener('input', () => handleVolumeInput(fsVolumeSlider.value));
+  fsVolumeSliderMobile.addEventListener('input', () => handleVolumeInput(fsVolumeSliderMobile.value));
 
-  // Mute toggle
-  volumeIcon.addEventListener('click', () => {
+  function toggleMute() {
     if (audio.muted || audio.volume === 0) {
       audio.muted = false;
       audio.volume = volumeBeforeMute || 1;
-      volumeSlider.value = String(audio.volume);
+      syncVolumeSliders();
     } else {
       volumeBeforeMute = audio.volume;
       audio.muted = true;
     }
     updateVolumeIcon();
-  });
+  }
+  volumeIcon.addEventListener('click', toggleMute);
+  fsVolumeIcon.addEventListener('click', toggleMute);
+  fsVolumeIconMobile.addEventListener('click', toggleMute);
 
-  // Audio events
+  // --- Audio events ---
+
   audio.addEventListener('play', () => updateIcons(true));
   audio.addEventListener('pause', () => updateIcons(false));
 
   audio.addEventListener('timeupdate', () => {
     if (!audio.duration) return;
     const pct = (audio.currentTime / audio.duration) * 100;
+
     progressFill.style.width = `${pct}%`;
     progressThumb.style.left = `${pct}%`;
     currentTimeEl.textContent = formatTime(audio.currentTime);
+
+    fsProgressFill.style.width = `${pct}%`;
+    fsProgressThumb.style.left = `${pct}%`;
+    fsCurrentTime.textContent = formatTime(audio.currentTime);
+    fsRemainingTime.textContent = formatRemainingTime(audio.duration - audio.currentTime);
   });
 
   audio.addEventListener('loadedmetadata', () => {
     totalTimeEl.textContent = formatTime(audio.duration);
+    fsRemainingTime.textContent = formatRemainingTime(audio.duration);
   });
 
-  // Progress bar seek
-  progressBar.addEventListener('click', (e: MouseEvent) => {
+  // --- Progress bar seek ---
+
+  function seekFromBar(bar: HTMLElement, e: MouseEvent) {
     if (!audio.duration) return;
-    const rect = progressBar.getBoundingClientRect();
-    const pct = (e.clientX - rect.left) / rect.width;
+    const rect = bar.getBoundingClientRect();
+    const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
     audio.currentTime = pct * audio.duration;
+  }
+  progressBar.addEventListener('click', (e) => seekFromBar(progressBar, e));
+  fsProgressBar.addEventListener('click', (e) => seekFromBar(fsProgressBar, e));
+
+  // Touch-based scrubbing for fullscreen progress bar
+  let fsScrubbing = false;
+
+  fsProgressBar.addEventListener('touchstart', (e: TouchEvent) => {
+    fsScrubbing = true;
+    fsProgressThumb.style.opacity = '1';
+    const touch = e.touches[0];
+    seekFromTouch(touch);
+  }, { passive: true });
+
+  fsProgressBar.addEventListener('touchmove', (e: TouchEvent) => {
+    if (!fsScrubbing) return;
+    const touch = e.touches[0];
+    seekFromTouch(touch);
+  }, { passive: true });
+
+  fsProgressBar.addEventListener('touchend', () => {
+    fsScrubbing = false;
+    fsProgressThumb.style.opacity = '';
   });
+
+  function seekFromTouch(touch: Touch) {
+    if (!audio.duration) return;
+    const rect = fsProgressBar.getBoundingClientRect();
+    const pct = Math.max(0, Math.min(1, (touch.clientX - rect.left) / rect.width));
+    audio.currentTime = pct * audio.duration;
+  }
 </script>
