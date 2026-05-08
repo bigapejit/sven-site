@@ -1,0 +1,119 @@
+---
+---
+
+<div id="player" class="fixed bottom-0 left-0 right-0 z-50 translate-y-full transition-transform duration-300">
+  <div class="bg-surface/95 backdrop-blur-xl border-t border-border">
+    <div class="max-w-2xl mx-auto px-4 py-3">
+      <!-- Progress bar -->
+      <div class="relative w-full h-1 bg-border rounded-full mb-3 cursor-pointer group" id="progress-bar">
+        <div class="absolute left-0 top-0 h-full bg-gradient-to-r from-purple to-neon rounded-full transition-all" id="progress-fill" style="width: 0%"></div>
+        <div class="absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-neon rounded-full opacity-0 group-hover:opacity-100 transition-opacity" id="progress-thumb" style="left: 0%"></div>
+      </div>
+
+      <div class="flex items-center gap-4">
+        <!-- Play/Pause -->
+        <button id="play-pause" class="flex-shrink-0 w-10 h-10 rounded-full bg-purple flex items-center justify-center hover:bg-purple-glow transition-colors cursor-pointer">
+          <svg id="icon-play" class="w-4 h-4 text-white ml-0.5" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M8 5v14l11-7z" />
+          </svg>
+          <svg id="icon-pause" class="w-4 h-4 text-white hidden" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M6 4h4v16H6zm8 0h4v16h-4z" />
+          </svg>
+        </button>
+
+        <!-- Track info -->
+        <div class="flex-1 min-w-0">
+          <p id="player-title" class="text-sm font-medium text-text truncate">Select an episode</p>
+          <p id="player-episode" class="text-xs text-text-muted"></p>
+        </div>
+
+        <!-- Time -->
+        <div class="flex-shrink-0 text-xs text-text-muted tabular-nums">
+          <span id="current-time">0:00</span>
+          <span class="mx-1">/</span>
+          <span id="total-time">0:00</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<audio id="audio" preload="metadata"></audio>
+
+<script>
+  const audio = document.getElementById('audio') as HTMLAudioElement;
+  const player = document.getElementById('player')!;
+  const playPause = document.getElementById('play-pause')!;
+  const iconPlay = document.getElementById('icon-play')!;
+  const iconPause = document.getElementById('icon-pause')!;
+  const playerTitle = document.getElementById('player-title')!;
+  const playerEpisode = document.getElementById('player-episode')!;
+  const currentTimeEl = document.getElementById('current-time')!;
+  const totalTimeEl = document.getElementById('total-time')!;
+  const progressBar = document.getElementById('progress-bar')!;
+  const progressFill = document.getElementById('progress-fill')!;
+  const progressThumb = document.getElementById('progress-thumb')!;
+
+  function formatTime(seconds: number): string {
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  }
+
+  function showPlayer() {
+    player.classList.remove('translate-y-full');
+    player.classList.add('translate-y-0');
+  }
+
+  function updateIcons(playing: boolean) {
+    iconPlay.classList.toggle('hidden', playing);
+    iconPause.classList.toggle('hidden', !playing);
+  }
+
+  document.querySelectorAll('[data-audio-url]').forEach((card) => {
+    card.addEventListener('click', () => {
+      const url = card.getAttribute('data-audio-url')!;
+      const title = card.getAttribute('data-title')!;
+      const episode = card.getAttribute('data-episode') || '';
+
+      if (audio.src !== url) {
+        audio.src = url;
+        playerTitle.textContent = title;
+        playerEpisode.textContent = episode ? `Ep. ${episode}` : '';
+        showPlayer();
+      }
+
+      audio.play();
+    });
+  });
+
+  playPause.addEventListener('click', () => {
+    if (audio.paused) {
+      audio.play();
+    } else {
+      audio.pause();
+    }
+  });
+
+  audio.addEventListener('play', () => updateIcons(true));
+  audio.addEventListener('pause', () => updateIcons(false));
+
+  audio.addEventListener('timeupdate', () => {
+    if (!audio.duration) return;
+    const pct = (audio.currentTime / audio.duration) * 100;
+    progressFill.style.width = `${pct}%`;
+    progressThumb.style.left = `${pct}%`;
+    currentTimeEl.textContent = formatTime(audio.currentTime);
+  });
+
+  audio.addEventListener('loadedmetadata', () => {
+    totalTimeEl.textContent = formatTime(audio.duration);
+  });
+
+  progressBar.addEventListener('click', (e: MouseEvent) => {
+    if (!audio.duration) return;
+    const rect = progressBar.getBoundingClientRect();
+    const pct = (e.clientX - rect.left) / rect.width;
+    audio.currentTime = pct * audio.duration;
+  });
+</script>

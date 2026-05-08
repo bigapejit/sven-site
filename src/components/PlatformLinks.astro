@@ -1,0 +1,50 @@
+---
+const platforms = [
+  { name: 'Apple Podcasts', url: 'https://podcasts.apple.com/us/podcast/you-vs-who/id1878400586', icon: 'apple' },
+  { name: 'Spotify', url: '#spotify', icon: 'spotify' },
+  { name: 'Amazon Music', url: '#amazon', icon: 'amazon' },
+  { name: 'Deezer', url: '#deezer', icon: 'deezer' },
+];
+
+const socials = [
+  { name: 'Instagram', url: '#instagram', icon: 'instagram' },
+  { name: 'TikTok', url: '#tiktok', icon: 'tiktok' },
+  { name: 'YouTube', url: '#youtube', icon: 'youtube' },
+];
+---
+
+<div class="flex flex-col items-center gap-4">
+  <div class="flex items-center gap-3">
+    <span class="text-xs text-text-muted uppercase tracking-wider">Listen on</span>
+    <div class="flex gap-2">
+      {platforms.map(({ name, url, icon }) => (
+        <a
+          href={url}
+          target="_blank"
+          rel="noopener noreferrer"
+          title={name}
+          class="w-9 h-9 rounded-xl bg-surface border border-border flex items-center justify-center hover:border-purple/50 hover:bg-surface-hover transition-all"
+        >
+          <img src={`/icons/${icon}.svg`} alt={name} class="w-4 h-4 opacity-70 hover:opacity-100 transition-opacity" />
+        </a>
+      ))}
+    </div>
+  </div>
+
+  <div class="flex items-center gap-3">
+    <span class="text-xs text-text-muted uppercase tracking-wider">Follow</span>
+    <div class="flex gap-2">
+      {socials.map(({ name, url, icon }) => (
+        <a
+          href={url}
+          target="_blank"
+          rel="noopener noreferrer"
+          title={name}
+          class="w-9 h-9 rounded-xl bg-surface border border-border flex items-center justify-center hover:border-neon/50 hover:bg-surface-hover transition-all"
+        >
+          <img src={`/icons/${icon}.svg`} alt={name} class="w-4 h-4 opacity-70 hover:opacity-100 transition-opacity" />
+        </a>
+      ))}
+    </div>
+  </div>
+</div>

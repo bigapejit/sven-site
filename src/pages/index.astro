@@ -1,0 +1,91 @@
+---
+import Layout from '../layouts/Layout.astro';
+import EpisodeCard from '../components/EpisodeCard.astro';
+import PlatformLinks from '../components/PlatformLinks.astro';
+import Player from '../components/Player.astro';
+
+const RSS_URL = 'https://api.riverside.com/hosting/kWEPdAuw.rss';
+
+interface Episode {
+  title: string;
+  episode: string;
+  duration: string;
+  audioUrl: string;
+}
+
+let episodes: Episode[] = [];
+
+try {
+  const res = await fetch(RSS_URL);
+  const xml = await res.text();
+
+  const items = xml.match(/<item[\s\S]*?<\/item>/g) || [];
+
+  episodes = items.map((item) => {
+    const title = item.match(/<title><!\[CDATA\[(.*?)\]\]><\/title>/)?.[1]
+      || item.match(/<title>(.*?)<\/title>/)?.[1]
+      || 'Untitled';
+
+    const episodeNum = item.match(/<itunes:episode>(.*?)<\/itunes:episode>/)?.[1] || '';
+
+    const duration = item.match(/<itunes:duration>(.*?)<\/itunes:duration>/)?.[1] || '';
+
+    const audioUrl = item.match(/<enclosure[^>]+url="([^"]+)"/)?.[1] || '';
+
+    return { title, episode: episodeNum, duration, audioUrl };
+  }).filter((ep) => ep.audioUrl);
+} catch (e) {
+  // RSS fetch failed — page renders with empty episode list
+}
+
+function formatDuration(raw: string): string {
+  const parts = raw.split(':').map(Number);
+  if (parts.length === 3) {
+    const [h, m] = parts;
+    return h > 0 ? `${h}h ${m}m` : `${m}m`;
+  }
+  return raw;
+}
+---
+
+<Layout title="You vs Who — Podcast">
+  <main class="max-w-2xl mx-auto px-4 pt-16 pb-8">
+    <!-- Header -->
+    <header class="flex flex-col items-center text-center mb-12">
+      <img
+        src="/logo.webp"
+        alt="You vs Who"
+        class="w-48 mb-6"
+      />
+      <p class="text-text-muted text-sm max-w-md leading-relaxed">
+        Free-form debates on games, movies, and pop culture. This vs That. Would You Rather. Locked-in verdicts.
+      </p>
+    </header>
+
+    <!-- Platform & Social Links -->
+    <section class="mb-12">
+      <PlatformLinks />
+    </section>
+
+    <!-- Episodes -->
+    <section>
+      <h2 class="text-xs uppercase tracking-wider text-text-muted mb-4">Episodes</h2>
+      <div class="flex flex-col gap-2">
+        {episodes.map((ep, i) => (
+          <EpisodeCard
+            title={ep.title}
+            episode={ep.episode}
+            duration={formatDuration(ep.duration)}
+            audioUrl={ep.audioUrl}
+            index={i}
+          />
+        ))}
+      </div>
+      {episodes.length === 0 && (
+        <p class="text-text-muted text-sm text-center py-8">No episodes found.</p>
+      )}
+    </section>
+  </main>
+
+  <Player />
+</Layout>
