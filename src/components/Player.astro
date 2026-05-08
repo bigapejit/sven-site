@@ -72,7 +72,17 @@
       <!-- Metadata -->
       <div class="mt-8 text-center w-full max-w-md">
         <p id="fs-date" class="text-sm text-white/60"></p>
-        <h2 id="fs-title" class="text-xl md:text-2xl font-bold text-white mt-1 truncate">Select an episode</h2>
+        <div class="flex items-center justify-center gap-2 mt-1">
+          <h2 id="fs-title" class="text-xl md:text-2xl font-bold text-white truncate">Select an episode</h2>
+          <div class="relative flex-shrink-0">
+            <button id="fs-share-btn" class="w-8 h-8 flex items-center justify-center text-white/60 hover:text-white transition-colors cursor-pointer" title="Share episode">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13"/>
+              </svg>
+            </button>
+            <span id="fs-share-toast" class="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-white text-[#1a0a2e] text-xs font-semibold rounded opacity-0 pointer-events-none transition-opacity whitespace-nowrap">Copied!</span>
+          </div>
+        </div>
         <p id="fs-subtitle" class="text-sm text-white/50 mt-1"></p>
       </div>
 
@@ -350,6 +360,8 @@
   const fsVolumeSlider = document.getElementById('fs-volume-slider') as HTMLInputElement;
   const fsVolumeIconMobile = document.getElementById('fs-volume-icon-mobile')!;
   const fsVolumeSliderMobile = document.getElementById('fs-volume-slider-mobile') as HTMLInputElement;
+  const fsShareBtn = document.getElementById('fs-share-btn')!;
+  const fsShareToast = document.getElementById('fs-share-toast')!;
 
   const SPEED_OPTIONS = [1, 1.5, 2, 0.5];
   let speedIndex = 0;
@@ -541,6 +553,35 @@
   volumeIcon.addEventListener('click', toggleMute);
   fsVolumeIcon.addEventListener('click', toggleMute);
   fsVolumeIconMobile.addEventListener('click', toggleMute);
+
+  // --- Share ---
+
+  let shareToastTimer: ReturnType<typeof setTimeout>;
+
+  function showShareToast() {
+    clearTimeout(shareToastTimer);
+    fsShareToast.style.opacity = '1';
+    shareToastTimer = setTimeout(() => {
+      fsShareToast.style.opacity = '0';
+    }, 1500);
+  }
+
+  fsShareBtn.addEventListener('click', async () => {
+    const title = fsTitle.textContent || '';
+    const url = window.location.href;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({ title, url });
+      } catch {}
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(url);
+      showShareToast();
+    } catch {}
+  });
 
   // --- Audio events ---
 
